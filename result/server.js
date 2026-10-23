@@ -5,7 +5,7 @@ var express = require('express'),
     app = express(),
     server = require('http').Server(app),
     // IMPORTANT: Socket.IO path is /result/socket.io
-    io = require('socket.io')(server, { path: '/result/socket.io' });
+    io = require('socket.io')(server, { path: '/socket.io' });
 
 var port = process.env.PORT || 4000;
 
