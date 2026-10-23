@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: rmavani/worker:latest
+          env:
+            - name: VOTING_MODE
+              value: "every-click"
+            - name: DB_HOST
+              value: "db"
+            - name: DB_USERNAME
+              value: "postgres"
+            - name: DB_NAME
+              value: "postgres"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: REDIS_HOST
+              value: "redis"

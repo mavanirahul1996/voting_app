@@ -1,0 +1,95 @@
+name: Voting App CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: voting-app-eks
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Vote image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./vote
+          platforms: linux/amd64
+          push: true
+          tags: |
+            rmavani/vote:latest
+            rmavani/vote:${{ github.sha }}
+
+      - name: Build and push Result image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./result
+          platforms: linux/amd64
+          push: true
+          tags: |
+            rmavani/result:latest
+            rmavani/result:${{ github.sha }}
+
+      - name: Build and push Worker image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./worker
+          platforms: linux/amd64
+          push: true
+          tags: |
+            rmavani/worker:latest
+            rmavani/worker:${{ github.sha }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Connect to EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region "$AWS_REGION" \
+            --name "$EKS_CLUSTER_NAME"
+
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -f k8s/
+
+      - name: Update application images
+        run: |
+          kubectl set image deployment/vote \
+            vote=rmavani/vote:${GITHUB_SHA}
+
+          kubectl set image deployment/result \
+            result=rmavani/result:${GITHUB_SHA}
+
+          kubectl set image deployment/worker \
+            worker=rmavani/worker:${GITHUB_SHA}
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/vote --timeout=180s
+          kubectl rollout status deployment/result --timeout=180s
+          kubectl rollout status deployment/worker --timeout=180s
+          kubectl get pods
