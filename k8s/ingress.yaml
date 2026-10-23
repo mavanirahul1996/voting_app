@@ -10,17 +10,27 @@ spec:
   rules:
     - http:
         paths:
-          - path: /vote(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: vote
-                port:
-                  number: 80
           - path: /result(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: result
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vote-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /vote
+            pathType: Prefix
+            backend:
+              service:
+                name: vote
                 port:
                   number: 80
