@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: vote
-          image: rmavani/vote:latest
+          image: pokfinner/vote:latest
           ports:
             - containerPort: 80
           env:

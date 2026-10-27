@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: us-east-1
-  EKS_CLUSTER_NAME: voting-app-eks
+  AWS_REGION: eu-central-1
+  EKS_CLUSTER_NAME: eks-rolando-p2
 
 jobs:
   build-and-deploy:
@@ -37,8 +37,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            rmavani/vote:latest
-            rmavani/vote:${{ github.sha }}
+            pokfinner/vote:latest
+            pokfinner/vote:${{ github.sha }}
 
       - name: Build and push Result image
         uses: docker/build-push-action@v7
@@ -47,8 +47,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            rmavani/result:latest
-            rmavani/result:${{ github.sha }}
+            pokfinner/result:latest
+            pokfinner/result:${{ github.sha }}
 
       - name: Build and push Worker image
         uses: docker/build-push-action@v7
@@ -57,8 +57,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            rmavani/worker:latest
-            rmavani/worker:${{ github.sha }}
+            pokfinner/worker:latest
+            pokfinner/worker:${{ github.sha }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -79,13 +79,13 @@ jobs:
       - name: Update application images
         run: |
           kubectl set image deployment/vote \
-            vote=rmavani/vote:${GITHUB_SHA}
+            vote=pokfinner/vote:${GITHUB_SHA}
 
           kubectl set image deployment/result \
-            result=rmavani/result:${GITHUB_SHA}
+            result=pokfinner/result:${GITHUB_SHA}
 
           kubectl set image deployment/worker \
-            worker=rmavani/worker:${GITHUB_SHA}
+            worker=pokfinner/worker:${GITHUB_SHA}
 
       - name: Verify deployment
         run: |
