@@ -1,3 +1,7 @@
+> **Portfolio context:** This is a multi-service voting application used for container and Kubernetes learning. It demonstrates how separate services communicate through Redis and PostgreSQL. It is a course/lab project, not a claim of a production-operated service. My separate [Voting_app_project](https://github.com/mavanirahul1996/Voting_app_project) repository contains the other version I use as a featured portfolio project.
+
+---
+
 <!-- © 2024 | Ironhack -->
 
 ---
