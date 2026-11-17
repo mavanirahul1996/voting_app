@@ -159,3 +159,12 @@ docker buildx build --platform linux/amd64 -t myorg/worker:latest ./worker
 This ensures the image is built for the desired platform.
 
 ---
+
+
+## GitHub Actions: image build and optional EKS deployment
+
+The workflow builds the Vote, Result and Worker images and pushes them to the Docker Hub namespace configured by the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets. Image tags include both `latest` and the Git commit SHA.
+
+The EKS deployment is manual, not automatic. To deploy, set the `EKS_CLUSTER_NAME` repository variable to the intended cluster, confirm the AWS credentials secrets and region, then open **Actions → Voting App CI/CD → Run workflow** and select `deploy_to_eks=true`. The workflow rewrites the Kubernetes image namespace to match the authenticated Docker Hub account and deploys the immutable commit tags.
+
+This separation prevents a routine code push from unexpectedly changing a cloud cluster. Review the target AWS account, region, cluster and Kubernetes namespace before manually deploying.
